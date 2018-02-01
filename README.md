@@ -1,2 +1,0 @@
-# Udacity-AI
-Nanodegree project

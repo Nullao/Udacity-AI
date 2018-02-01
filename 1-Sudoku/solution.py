@@ -1,4 +1,3 @@
-
 from utils import *
 
 def cross(a, b):

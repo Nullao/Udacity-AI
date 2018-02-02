@@ -37,6 +37,18 @@ unitlist = unitlist + diag_units
 units = extract_units(unitlist, boxes)
 peers = extract_peers(units, boxes)
 
+row = extract_units(row_units, boxes)
+row_peers = extract_peers(row, boxes)
+
+col = extract_units(column_units, boxes)
+col_peers = extract_peers(col, boxes)
+
+square = extract_units(square_units, boxes)
+square_peers = extract_peers(square, boxes)
+
+diag = extract_units(diag_units, boxes)
+diag_peers = extract_peers(diag, boxes)
+
 def grid_values(grid):
     values = []
     all_digits = '123456789'
@@ -91,7 +103,38 @@ def naked_twins(values):
     and because it is simpler (since the reduce_puzzle function already calls this
     strategy repeatedly).
     """
-    raise NotImplementedError
+    paired_values = [box for box in values.keys() if len(values[box] == 2)]
+    for box in paired_values:
+        pairs = values[box]
+        for box2 in [elem for elem in paired_values if (elem != box and values[elem] == pairs)]:    
+            if box2 in row_peers[A1]:
+                temp = row_peers[box]
+                for peer in temp.remove(box2):
+                    values[peer] = values[peer].replace(pairs[0],'')
+                    values[peer] = values[peer].replace(pairs[1],'')
+
+            if box2 in col_peers[A1]:
+                temp = col_peers[box]
+                for peer in temp.remove(box2):
+                    values[peer] = values[peer].replace(pairs[0],'')
+                    values[peer] = values[peer].replace(pairs[1],'')
+            
+            if box2 in square_peers[A1]:
+                temp = square_peers[box]
+                for peer in temp.remove(box2):
+                    values[peer] = values[peer].replace(pairs[0],'')
+                    values[peer] = values[peer].replace(pairs[1],'')
+            
+            if box2 in diag_peers[A1]:
+                temp = diag_peers[box]
+                for peer in temp.remove(box2):
+                    values[peer] = values[peer].replace(pairs[0],'')
+                    values[peer] = values[peer].replace(pairs[1],'')
+
+    return values
+
+
+
 
 
 def eliminate(values):
@@ -110,7 +153,7 @@ def eliminate(values):
     dict
         The values dictionary with the assigned values eliminated from peers
     """
-   solved_values = [box for box in values.keys() if len(values[box]) == 1]
+    solved_values = [box for box in values.keys() if (len(values[box]) == 1)]
     for box in solved_values:
         digit = values[box]
         for peer in peers[box]:
@@ -137,7 +180,7 @@ def only_choice(values):
     -----
     You should be able to complete this function by copying your code from the classroom
     """
-     for unit in unitlist:
+    for unit in unitlist:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
             if len(dplaces) == 1:

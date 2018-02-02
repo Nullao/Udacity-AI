@@ -103,33 +103,42 @@ def naked_twins(values):
     and because it is simpler (since the reduce_puzzle function already calls this
     strategy repeatedly).
     """
-    paired_values = [box for box in values.keys() if len(values[box] == 2)]
-    for box in paired_values:
-        pairs = values[box]
-        for box2 in [elem for elem in paired_values if (elem != box and values[elem] == pairs)]:    
-            if box2 in row_peers[A1]:
-                temp = row_peers[box]
-                for peer in temp.remove(box2):
-                    values[peer] = values[peer].replace(pairs[0],'')
-                    values[peer] = values[peer].replace(pairs[1],'')
+    
+    paired_values = [box for box in values.keys() if (len(values[box]) == 2)]
+    #print (paired_values)
+    if (len(paired_values) != 0):
+        for box in paired_values:
+            pairs = values[box]
+            for box2 in [elem for elem in paired_values if (elem != box and values[elem] == pairs)]:    
+                if box2 in row_peers[box]:
+                    temp = row_peers[box]
+                    temp.remove(box2)
+                    for peer in temp:
+                        values[peer] = values[peer].replace(pairs[0],'')
+                        values[peer] = values[peer].replace(pairs[1],'')
 
-            if box2 in col_peers[A1]:
-                temp = col_peers[box]
-                for peer in temp.remove(box2):
-                    values[peer] = values[peer].replace(pairs[0],'')
-                    values[peer] = values[peer].replace(pairs[1],'')
-            
-            if box2 in square_peers[A1]:
-                temp = square_peers[box]
-                for peer in temp.remove(box2):
-                    values[peer] = values[peer].replace(pairs[0],'')
-                    values[peer] = values[peer].replace(pairs[1],'')
-            
-            if box2 in diag_peers[A1]:
-                temp = diag_peers[box]
-                for peer in temp.remove(box2):
-                    values[peer] = values[peer].replace(pairs[0],'')
-                    values[peer] = values[peer].replace(pairs[1],'')
+                if box2 in col_peers[box]:
+                    temp = col_peers[box]
+                    temp.remove(box2)
+                    for peer in temp:
+                        values[peer] = values[peer].replace(pairs[0],'')
+                        values[peer] = values[peer].replace(pairs[1],'')
+                
+                if box2 in square_peers[box]:
+                    temp = square_peers[box]
+                    temp.remove(box2)
+                    for peer in temp:
+                        values[peer] = values[peer].replace(pairs[0],'')
+                        values[peer] = values[peer].replace(pairs[1],'')
+                
+                if (len(diag_peers[box]) != 0):
+                    
+                    if box2 in diag_peers[box]:
+                       temp = diag_peers[box]
+                       temp.remove(box2)
+                       for peer in temp:
+                          values[peer] = values[peer].replace(pairs[0],'')
+                          values[peer] = values[peer].replace(pairs[1],'')
 
     return values
 
@@ -213,6 +222,7 @@ def reduce_puzzle(values):
         values = eliminate(values)
         # Your code here: Use the Only Choice Strategy
         values = only_choice(values)
+        values = naked_twins(values)
         # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         # If no new values were added, stop the loop.

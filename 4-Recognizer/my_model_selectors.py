@@ -34,7 +34,7 @@ class ModelSelector(object):
     def base_model(self, num_states):
         # with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=DeprecationWarning)
-        # warnings.filterwarnings("ignore", category=RuntimeWarning)
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
         try:
             hmm_model = GaussianHMM(n_components=num_states, covariance_type="diag", n_iter=1000,
                                     random_state=self.random_state, verbose=False).fit(self.X, self.lengths)
@@ -75,9 +75,27 @@ class SelectorBIC(ModelSelector):
         :return: GaussianHMM object
         """
         warnings.filterwarnings("ignore", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        best_score = float("inf")
+        best_model = None
+        for n in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = self.base_model(n)
+                logL = model.score(self.X, self.lengths)
+                logN = np.log(len(self.X))
+                p = n * (n - 1) + 2 * len(self.X[0]) * n
+                score = -2 * logL + p * logN
+                if score < best_score:
+                    best_score = score
+                    best_model = model       
+            except:
+                pass    
+        if best_model is None:
+            return self.base_model(self.n_constant)
+        else:
+            return best_model
 
-        # TODO implement model selection based on BIC scores
-        raise NotImplementedError
+
 
 
 class SelectorDIC(ModelSelector):
@@ -92,18 +110,65 @@ class SelectorDIC(ModelSelector):
 
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        best_score = float("-inf")
+        best_model = None
 
-        # TODO implement model selection based on DIC scores
-        raise NotImplementedError
+        word_list = list(self.words)
+        word_list.remove(self.this_word)
+        for n in range (self.min_n_components, self.max_n_components + 1):
+            try:
+                score_i = 0
+                model = self.base_model(n)
+                logL = model.score(self.X, self.lengths)
+                for word in word_list:
+                    X, lengths = self.hwords[word]
+                    score_i += model.score(X, lengths)
+                DIC = logL - score_i / (len(self.words) - 1)
+                if best_score < score:
+                        best_score = score
+                        best_model = model
+            except:
+                pass
+        if best_model is None:
+            return self.base_model(self.n_constant)
+        else:
+            return best_model
 
 
 class SelectorCV(ModelSelector):
     ''' select best model based on average log Likelihood of cross-validation folds
-
     '''
 
-    def select(self):
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-        # TODO implement model selection using CV
-        raise NotImplementedError
+    def select(self):
+        """ select the best model for self.this_word based on
+        CV score for n between self.min_n_components and self.max_n_components
+        It is based on log likehood
+        :return: GaussianHMM object
+        """
+        FOLDS_NUM = 3
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+        try:
+            best_score = float("Inf")
+            best_model = None
+            for n in range(self.min_n_components, self.max_n_components+1):
+
+                scores = []
+                split_method = KFold(n_splits=FOLDS_NUM)
+
+                for train_idx, test_idx in split_method.split(self.sequences):
+                    self.X, self.lengths = combine_sequences(train_idx, self.sequences)
+                    model = self.base_model(n)
+                    X, l = combine_sequences(test_idx, self.sequences)
+                    scores.append(model.score(X, l))
+                    score = np.mean(scores)
+
+                if score < best_score:
+                    best_score = score
+                    best_model = model
+            return best_model
+        except:
+            return self.base_model(self.n_constant)

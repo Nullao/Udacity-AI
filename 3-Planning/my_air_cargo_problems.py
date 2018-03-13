@@ -60,7 +60,18 @@ class AirCargoProblem(Problem):
             :return: list of Action objects
             """
             loads = []
-
+            for car in self.cargos:
+                for pla in self.planes:
+                    for air in self.airports:
+                        precond_pos = [ expr("At({}, {})".format(car, air)),
+                                        expr("At({}, {})".format(pla, air))]
+                        precond_neg = []
+                        effect_add = [expr("In({}, {})".format(car, pla))]
+                        effect_rem = [expr("At({}, {})".format(car, air))]
+                        load = Action(expr("Load({}, {}, {})".format(car, pla, air)),
+                                         [precond_pos, precond_neg],
+                                         [effect_add, effect_rem])
+                        loads.append(load)
             # TODO create all load ground actions from the domain Load action
             return loads
 
@@ -70,6 +81,18 @@ class AirCargoProblem(Problem):
             :return: list of Action objects
             """
             unloads = []
+            for car in self.cargos:
+                for pla in self.planes:
+                    for air in self.airports:
+                        precond_pos = [ expr("In({}, {})".format(car, pla)),
+                                        expr("At({}, {})".format(pla, air))]
+                        precond_neg = []
+                        effect_add = [expr("At({}, {})".format(car, air))]
+                        effect_rem = [expr("In({}, {})".format(car, pla))]
+                        unload = Action(expr("Unload({}, {}, {})".format(car, pla, air)),
+                                         [precond_pos, precond_neg],
+                                         [effect_add, effect_rem])
+                        unloads.append(unload)
             # TODO create all Unload ground actions from the domain Unload action
             return unloads
 

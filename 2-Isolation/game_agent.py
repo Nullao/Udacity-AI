@@ -75,9 +75,10 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    my_move = len(game.get_legal_moves(player)) / len(game.get_blank_spaces())
-    my_opp = len(game.get_legal_moves(game.get_opponent(player))) / len(game.get_blank_spaces())
-    return float(my_move - my_opp)
+    y, x = game.get_player_location(player)
+    y2, x2 = game.get_player_location(game.get_opponent(player))
+    w, h = game.width / 2., game.height / 2.
+    return float((y2 - y)**2 + (x2 - x)**2) + float((h - y)**2 + (w - x)**2)
 
 
 def custom_score_3(game, player):
@@ -110,9 +111,14 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    my_move = len(game.get_legal_moves(player)) / len(game.get_blank_spaces())
-    my_opp = len(game.get_legal_moves(game.get_opponent(player))) / len(game.get_blank_spaces())
-    return float(my_move - 3 * my_opp)
+    y, x = game.get_player_location(player)
+    y2, x2 = game.get_player_location(game.get_opponent(player))
+    w, h = game.width / 2., game.height / 2.
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    blank = len(game.get_blank_spaces())
+    sign = -1 if own_moves < opp_moves else 1
+    return float((y2 - y)**2 + (x2 - x)**2) + float((h - y)**2 + (w - x)**2) + float(sign * (own_moves - opp_moves)**2)
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never

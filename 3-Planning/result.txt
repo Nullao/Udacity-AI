@@ -1,0 +1,13 @@
+PROBLEMS = [["Air Cargo Problem 1", air_cargo_p1],
+            ["Air Cargo Problem 2", air_cargo_p2],
+            ["Air Cargo Problem 3", air_cargo_p3]]
+SEARCHES = [["breadth_first_search", breadth_first_search, ""],
+            ['breadth_first_tree_search', breadth_first_tree_search, ""],
+            ['depth_first_graph_search', depth_first_graph_search, ""],
+            ['depth_limited_search', depth_limited_search, ""],
+            ['uniform_cost_search', uniform_cost_search, ""],
+            ['recursive_best_first_search', recursive_best_first_search, 'h_1'],
+            ['greedy_best_first_graph_search', greedy_best_first_graph_search, 'h_1'],
+            ['astar_search', astar_search, 'h_1'],
+            ['astar_search', astar_search, 'h_ignore_preconditions'],
+            ['astar_search', astar_search, 'h_pg_levelsum']]
